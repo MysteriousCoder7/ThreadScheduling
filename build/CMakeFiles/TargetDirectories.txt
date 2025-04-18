@@ -1,0 +1,9 @@
+/home/saksham/IT371P/build/CMakeFiles/intrinsics_gen.dir
+/home/saksham/IT371P/build/CMakeFiles/omp_gen.dir
+/home/saksham/IT371P/build/CMakeFiles/acc_gen.dir
+/home/saksham/IT371P/build/CMakeFiles/RISCVTargetParserTableGen.dir
+/home/saksham/IT371P/build/CMakeFiles/clang-tablegen-targets.dir
+/home/saksham/IT371P/build/CMakeFiles/CallGraphExtractor.dir
+/home/saksham/IT371P/build/CMakeFiles/ThreadDetector.dir
+/home/saksham/IT371P/build/CMakeFiles/edit_cache.dir
+/home/saksham/IT371P/build/CMakeFiles/rebuild_cache.dir
