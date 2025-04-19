@@ -1,82 +1,74 @@
+#include "clang/AST/AST.h"
 #include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/FrontendActions.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
-#include "clang/Frontend/FrontendActions.h"
-#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/ASTMatchers/ASTMatchers.h"
+#include "clang/ASTMatchers/ASTMatchFinder.h"
+
 #include "llvm/Support/CommandLine.h"
-#include <iostream>
+#include "llvm/Support/raw_ostream.h"
 
 using namespace clang;
 using namespace clang::tooling;
+using namespace clang::ast_matchers;
 
-class ThreadVisitor : public RecursiveASTVisitor<ThreadVisitor> {
+// Matches variables that are either:
+// 1. Directly of type std::thread
+// 2. Templated with std::thread, e.g., std::vector<std::thread>
+DeclarationMatcher threadVarMatcher = varDecl(
+    anyOf(
+        hasType(recordDecl(hasName("std::thread"))),
+        hasType(hasUnqualifiedDesugaredType(
+            templateSpecializationType(hasAnyTemplateArgument(
+                refersToType(recordType(hasDeclaration(recordDecl(hasName("std::thread")))))
+            ))
+        ))
+    )
+).bind("threadVar");
+
+class ThreadVarCallback : public MatchFinder::MatchCallback {
 public:
-    explicit ThreadVisitor(ASTContext *Context) : Context(Context) {}
+    int threadCount = 0;
 
-    bool VisitCXXConstructExpr(CXXConstructExpr *Expr) {
-        if (auto CTor = Expr->getConstructor()) {
-            if (auto RD = CTor->getParent()) {
-                if (RD->getQualifiedNameAsString() == "std::thread") {
-                    std::cout << "std::thread created at ";
-                    Expr->getExprLoc().print(llvm::outs(), Context->getSourceManager());
-                    std::cout << std::endl;
-                    threadCount++;
-                }
-            }
+    virtual void run(const MatchFinder::MatchResult &Result) {
+        const VarDecl *var = Result.Nodes.getNodeAs<VarDecl>("threadVar");
+        if (var) {
+            ++threadCount;
+            llvm::outs() << "Found std::thread variable: " << var->getNameAsString()
+                         << " at " << var->getBeginLoc().printToString(*Result.SourceManager)
+                         << "\n";
         }
-        return true;
     }
-
-    bool VisitCallExpr(CallExpr *Call) {
-        if (FunctionDecl *FD = Call->getDirectCallee()) {
-            if (FD->getNameAsString() == "pthread_create") {
-                std::cout << "pthread_create found at ";
-                Call->getExprLoc().print(llvm::outs(), Context->getSourceManager());
-                std::cout << std::endl;
-                threadCount++;
-            }
-        }
-        return true;
-    }
-
-    static int threadCount;
-
-private:
-    ASTContext *Context;
 };
 
-int ThreadVisitor::threadCount = 0;
-
-class ThreadDetectorConsumer : public ASTConsumer {
+class ThreadFrontendAction : public ASTFrontendAction {
 public:
-    explicit ThreadDetectorConsumer(ASTContext *Context) : Visitor(Context) {}
+    void EndSourceFileAction() override {
+        llvm::outs() << "Total threads found: " << threadCallback.threadCount << "\n";
+    }
 
-    void HandleTranslationUnit(ASTContext &Context) override {
-        Visitor.TraverseDecl(Context.getTranslationUnitDecl());
-        std::cout << "\nTotal threads found: " << ThreadVisitor::threadCount << std::endl;
+    std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
+                                                   StringRef file) override {
+        finder.addMatcher(threadVarMatcher, &threadCallback);
+        return finder.newASTConsumer();
     }
 
 private:
-    ThreadVisitor Visitor;
+    ThreadVarCallback threadCallback;
+    MatchFinder finder;
 };
 
-class ThreadDetectorAction : public ASTFrontendAction {
-public:
-    std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef file) override {
-        return std::make_unique<ThreadDetectorConsumer>(&CI.getASTContext());
-    }
-};
-
-static llvm::cl::OptionCategory ThreadToolCategory("thread-detector options");
+static llvm::cl::OptionCategory MyToolCategory("thread-detector options");
 
 int main(int argc, const char **argv) {
-    auto ExpectedParser = CommonOptionsParser::create(argc, argv, ThreadToolCategory);
+    auto ExpectedParser = CommonOptionsParser::create(argc, argv, MyToolCategory);
     if (!ExpectedParser) {
         llvm::errs() << ExpectedParser.takeError();
         return 1;
     }
-
-    ClangTool Tool(ExpectedParser->getCompilations(), ExpectedParser->getSourcePathList());
-    return Tool.run(newFrontendActionFactory<ThreadDetectorAction>().get());
+    CommonOptionsParser &OptionsParser = ExpectedParser.get();
+    ClangTool Tool(OptionsParser.getCompilations(),
+                   OptionsParser.getSourcePathList());
+    return Tool.run(newFrontendActionFactory<ThreadFrontendAction>().get());
 }
-

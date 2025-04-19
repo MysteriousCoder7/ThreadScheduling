@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/home/saksham/IT371P/build",
+  "command": "/usr/bin/c++  -I/usr/lib/llvm-18/include -std=gnu++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/CallGraphExtractor.dir/CallGraphExtractor.cpp.o -c /home/saksham/IT371P/CallGraphExtractor.cpp",
+  "file": "/home/saksham/IT371P/CallGraphExtractor.cpp",
+  "output": "CMakeFiles/CallGraphExtractor.dir/CallGraphExtractor.cpp.o"
+},
+{
+  "directory": "/home/saksham/IT371P/build",
+  "command": "/usr/bin/c++  -I/usr/lib/llvm-18/include -std=gnu++17   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o -c /home/saksham/IT371P/ThreadDetector.cpp",
+  "file": "/home/saksham/IT371P/ThreadDetector.cpp",
+  "output": "CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o"
+}
+]

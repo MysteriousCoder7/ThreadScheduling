@@ -20,8 +20,6 @@ CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o
  /usr/include/c++/13/bits/allocator.h
  /usr/include/c++/13/bits/atomic_base.h
  /usr/include/c++/13/bits/atomic_lockfree_defines.h
- /usr/include/c++/13/bits/basic_ios.h
- /usr/include/c++/13/bits/basic_ios.tcc
  /usr/include/c++/13/bits/basic_string.h
  /usr/include/c++/13/bits/basic_string.tcc
  /usr/include/c++/13/bits/char_traits.h
@@ -44,12 +42,9 @@ CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o
  /usr/include/c++/13/bits/hashtable_policy.h
  /usr/include/c++/13/bits/invoke.h
  /usr/include/c++/13/bits/ios_base.h
- /usr/include/c++/13/bits/istream.tcc
  /usr/include/c++/13/bits/list.tcc
  /usr/include/c++/13/bits/locale_classes.h
  /usr/include/c++/13/bits/locale_classes.tcc
- /usr/include/c++/13/bits/locale_facets.h
- /usr/include/c++/13/bits/locale_facets.tcc
  /usr/include/c++/13/bits/localefwd.h
  /usr/include/c++/13/bits/memory_resource.h
  /usr/include/c++/13/bits/memoryfwd.h
@@ -57,7 +52,6 @@ CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o
  /usr/include/c++/13/bits/nested_exception.h
  /usr/include/c++/13/bits/new_allocator.h
  /usr/include/c++/13/bits/node_handle.h
- /usr/include/c++/13/bits/ostream.tcc
  /usr/include/c++/13/bits/ostream_insert.h
  /usr/include/c++/13/bits/parse_numbers.h
  /usr/include/c++/13/bits/postypes.h
@@ -123,7 +117,6 @@ CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o
  /usr/include/c++/13/cstring
  /usr/include/c++/13/ctime
  /usr/include/c++/13/cwchar
- /usr/include/c++/13/cwctype
  /usr/include/c++/13/debug/assertions.h
  /usr/include/c++/13/debug/debug.h
  /usr/include/c++/13/deque
@@ -137,10 +130,7 @@ CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o
  /usr/include/c++/13/ext/type_traits.h
  /usr/include/c++/13/functional
  /usr/include/c++/13/initializer_list
- /usr/include/c++/13/ios
  /usr/include/c++/13/iosfwd
- /usr/include/c++/13/iostream
- /usr/include/c++/13/istream
  /usr/include/c++/13/iterator
  /usr/include/c++/13/limits
  /usr/include/c++/13/list
@@ -149,7 +139,6 @@ CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o
  /usr/include/c++/13/mutex
  /usr/include/c++/13/new
  /usr/include/c++/13/optional
- /usr/include/c++/13/ostream
  /usr/include/c++/13/pstl/execution_defs.h
  /usr/include/c++/13/pstl/glue_algorithm_defs.h
  /usr/include/c++/13/pstl/glue_memory_defs.h
@@ -189,7 +178,6 @@ CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o
  /usr/include/strings.h
  /usr/include/time.h
  /usr/include/wchar.h
- /usr/include/wctype.h
  /usr/include/x86_64-linux-gnu/asm/errno.h
  /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h
  /usr/include/x86_64-linux-gnu/bits/byteswap.h
@@ -254,7 +242,6 @@ CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o
  /usr/include/x86_64-linux-gnu/bits/waitflags.h
  /usr/include/x86_64-linux-gnu/bits/waitstatus.h
  /usr/include/x86_64-linux-gnu/bits/wchar.h
- /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h
  /usr/include/x86_64-linux-gnu/bits/wordsize.h
  /usr/include/x86_64-linux-gnu/bits/xopen_lim.h
  /usr/include/x86_64-linux-gnu/c++/13/bits/atomic_word.h
@@ -262,8 +249,6 @@ CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h
  /usr/include/x86_64-linux-gnu/c++/13/bits/cpu_defines.h
- /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h
- /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_inline.h
  /usr/include/x86_64-linux-gnu/c++/13/bits/error_constants.h
  /usr/include/x86_64-linux-gnu/c++/13/bits/gthr-default.h
  /usr/include/x86_64-linux-gnu/c++/13/bits/gthr.h
@@ -291,19 +276,21 @@ CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o
  /usr/lib/llvm-18/include/clang/APINotes/APINotesOptions.h
  /usr/lib/llvm-18/include/clang/AST/APNumericStorage.h
  /usr/lib/llvm-18/include/clang/AST/APValue.h
+ /usr/lib/llvm-18/include/clang/AST/AST.h
  /usr/lib/llvm-18/include/clang/AST/ASTConcept.h
  /usr/lib/llvm-18/include/clang/AST/ASTConsumer.h
  /usr/lib/llvm-18/include/clang/AST/ASTContext.h
  /usr/lib/llvm-18/include/clang/AST/ASTContextAllocate.h
  /usr/lib/llvm-18/include/clang/AST/ASTDumperUtils.h
  /usr/lib/llvm-18/include/clang/AST/ASTFwd.h
+ /usr/lib/llvm-18/include/clang/AST/ASTTypeTraits.h
  /usr/lib/llvm-18/include/clang/AST/ASTUnresolvedSet.h
  /usr/lib/llvm-18/include/clang/AST/ASTVector.h
  /usr/lib/llvm-18/include/clang/AST/Attr.h
  /usr/lib/llvm-18/include/clang/AST/AttrIterator.h
- /usr/lib/llvm-18/include/clang/AST/AttrVisitor.inc
  /usr/lib/llvm-18/include/clang/AST/Attrs.inc
  /usr/lib/llvm-18/include/clang/AST/BuiltinTypes.def
+ /usr/lib/llvm-18/include/clang/AST/CXXInheritance.h
  /usr/lib/llvm-18/include/clang/AST/CXXRecordDeclDefinitionBits.def
  /usr/lib/llvm-18/include/clang/AST/CanonicalType.h
  /usr/lib/llvm-18/include/clang/AST/CharUnits.h
@@ -320,7 +307,6 @@ CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o
  /usr/lib/llvm-18/include/clang/AST/DeclNodes.inc
  /usr/lib/llvm-18/include/clang/AST/DeclObjC.h
  /usr/lib/llvm-18/include/clang/AST/DeclObjCCommon.h
- /usr/lib/llvm-18/include/clang/AST/DeclOpenMP.h
  /usr/lib/llvm-18/include/clang/AST/DeclTemplate.h
  /usr/lib/llvm-18/include/clang/AST/DeclarationName.h
  /usr/lib/llvm-18/include/clang/AST/DependenceFlags.h
@@ -335,9 +321,9 @@ CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o
  /usr/lib/llvm-18/include/clang/AST/OpenMPClause.h
  /usr/lib/llvm-18/include/clang/AST/OperationKinds.def
  /usr/lib/llvm-18/include/clang/AST/OperationKinds.h
+ /usr/lib/llvm-18/include/clang/AST/ParentMapContext.h
  /usr/lib/llvm-18/include/clang/AST/PrettyPrinter.h
  /usr/lib/llvm-18/include/clang/AST/RawCommentList.h
- /usr/lib/llvm-18/include/clang/AST/RecursiveASTVisitor.h
  /usr/lib/llvm-18/include/clang/AST/Redeclarable.h
  /usr/lib/llvm-18/include/clang/AST/SelectorLocationsKind.h
  /usr/lib/llvm-18/include/clang/AST/Stmt.h
@@ -346,13 +332,19 @@ CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o
  /usr/lib/llvm-18/include/clang/AST/StmtNodes.inc
  /usr/lib/llvm-18/include/clang/AST/StmtObjC.h
  /usr/lib/llvm-18/include/clang/AST/StmtOpenMP.h
+ /usr/lib/llvm-18/include/clang/AST/StmtVisitor.h
  /usr/lib/llvm-18/include/clang/AST/TemplateBase.h
  /usr/lib/llvm-18/include/clang/AST/TemplateName.h
  /usr/lib/llvm-18/include/clang/AST/Type.h
  /usr/lib/llvm-18/include/clang/AST/TypeLoc.h
  /usr/lib/llvm-18/include/clang/AST/TypeLocNodes.def
  /usr/lib/llvm-18/include/clang/AST/TypeNodes.inc
+ /usr/lib/llvm-18/include/clang/AST/TypeOrdering.h
  /usr/lib/llvm-18/include/clang/AST/UnresolvedSet.h
+ /usr/lib/llvm-18/include/clang/ASTMatchers/ASTMatchFinder.h
+ /usr/lib/llvm-18/include/clang/ASTMatchers/ASTMatchers.h
+ /usr/lib/llvm-18/include/clang/ASTMatchers/ASTMatchersInternal.h
+ /usr/lib/llvm-18/include/clang/ASTMatchers/ASTMatchersMacros.h
  /usr/lib/llvm-18/include/clang/Analysis/AnalysisDeclContext.h
  /usr/lib/llvm-18/include/clang/Analysis/BodyFarm.h
  /usr/lib/llvm-18/include/clang/Analysis/CFG.h
@@ -477,6 +469,8 @@ CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o
  /usr/lib/llvm-18/include/clang/StaticAnalyzer/Core/AnalyzerOptions.def
  /usr/lib/llvm-18/include/clang/StaticAnalyzer/Core/AnalyzerOptions.h
  /usr/lib/llvm-18/include/clang/Tooling/ArgumentsAdjusters.h
+ /usr/lib/llvm-18/include/clang/Tooling/CommonOptionsParser.h
+ /usr/lib/llvm-18/include/clang/Tooling/CompilationDatabase.h
  /usr/lib/llvm-18/include/clang/Tooling/Tooling.h
  /usr/lib/llvm-18/include/llvm-c/DataTypes.h
  /usr/lib/llvm-18/include/llvm-c/Error.h
@@ -604,6 +598,7 @@ CMakeFiles/ThreadDetector.dir/ThreadDetector.cpp.o
  /usr/lib/llvm-18/include/llvm/Support/SourceMgr.h
  /usr/lib/llvm-18/include/llvm/Support/StringSaver.h
  /usr/lib/llvm-18/include/llvm/Support/SwapByteOrder.h
+ /usr/lib/llvm-18/include/llvm/Support/Timer.h
  /usr/lib/llvm-18/include/llvm/Support/TrailingObjects.h
  /usr/lib/llvm-18/include/llvm/Support/TypeSize.h
  /usr/lib/llvm-18/include/llvm/Support/VersionTuple.h

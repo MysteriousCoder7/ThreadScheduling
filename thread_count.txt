@@ -1,0 +1,4 @@
+pthread_create found at 
+
+Total threads found: 1
+/usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/x86_64-linux-gnu/c++/13/bits/gthr-default.h:663:10 <Spelling=/usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/x86_64-linux-gnu/c++/13/bits/gthr-default.h:663:19>

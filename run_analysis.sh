@@ -1,11 +1,11 @@
 #!/bin/bash
 mkdir -p build && cd build
-cmake ..
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
 make
 
 echo "Generating call graph:"
-./CallGraphExtractor -p .. ../MultiProcessorEnv.cpp
+./CallGraphExtractor -p .. ../example.cpp
 
 
 echo -e "\nDetecting thread usage:"
-./ThreadDetector ../MultiProcessorEnv.cpp
+./ThreadDetector ../example.cpp
