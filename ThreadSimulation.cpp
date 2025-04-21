@@ -9,18 +9,20 @@
 #include <map>
 #include <iomanip>
 #include <ctime>
+#include <fstream>
+#include <filesystem>
+#include <sstream>
 
 struct SimThread {
     int id;
     std::string name;
     int burstTime;
-    int remainingBurstTime;  // This tracks remaining burst time
+    int remainingBurstTime;
 
     SimThread(int id, std::string name, int burstTime)
         : id(id), name(name), burstTime(burstTime), remainingBurstTime(burstTime) {}
 };
 
-// Utility to get current time string
 std::string currentTime() {
     auto now = std::chrono::system_clock::now();
     std::time_t t = std::chrono::system_clock::to_time_t(now);
@@ -40,7 +42,17 @@ private:
 
     std::map<int, std::vector<std::string>> processorAssignments;
     std::mutex printMutex;
-    int timeQuantum;  // Time slice for Round Robin scheduling
+    int timeQuantum;
+    int activeTasks = 0;
+
+    std::map<int, int> taskCount;
+    std::map<int, long long> execTime;
+
+    std::vector<int> turnaroundTimes;
+    std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
+
+    std::vector<std::string> executionLog;
+    int totalThreads = 0;
 
 public:
     ThreadScheduler(int tq) : timeQuantum(tq) {}
@@ -48,110 +60,151 @@ public:
     void addThread(const SimThread& t) {
         std::lock_guard<std::mutex> lock(queueMutex);
         taskQueue.push(t);
+        activeTasks++;
+        totalThreads++;
         std::cout << "[+] Added thread " << t.name << " with burst time: " << t.burstTime << "ms\n";
         cv.notify_one();
     }
 
     void runWithProcessors(int numProcessors) {
-        std::vector<std::thread> processors;
+        startTime = std::chrono::high_resolution_clock::now();
 
-        for (int i = 0; i < numProcessors; ++i) {
-            processors.emplace_back([this, i]() {
-                while (true) {
-                    SimThread t(0, "", 0);
-                    {
-                        std::unique_lock<std::mutex> lock(queueMutex);
-                        cv.wait(lock, [this]() { return !taskQueue.empty() || done; });
-
-                        if (taskQueue.empty() && done)
-                            return;
-
+        auto worker = [&](int processorId) {
+            while (true) {
+                SimThread t(0, "", 0);
+                {
+                    std::unique_lock<std::mutex> lock(queueMutex);
+                    cv.wait(lock, [&]() { return !taskQueue.empty() || done; });
+                    if (taskQueue.empty() && done) break;
+                    if (!taskQueue.empty()) {
                         t = taskQueue.front();
                         taskQueue.pop();
-                        processorAssignments[i].push_back(t.name);
+                    } else {
+                        continue;
                     }
+                }
+
+                auto startThread = std::chrono::high_resolution_clock::now();
+                while (t.remainingBurstTime > 0) {
+                    auto start = std::chrono::high_resolution_clock::now();
+
+                    int exec = std::min(timeQuantum, t.remainingBurstTime);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(exec));
+                    t.remainingBurstTime -= exec;
+
+                    auto end = std::chrono::high_resolution_clock::now();
+                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
                     {
                         std::lock_guard<std::mutex> lock(printMutex);
-                        std::cout << "[" << currentTime() << "] [P" << i << "] Assigned: " << t.name
-                                  << " (burst: " << t.burstTime << "ms)\n";
-                    }
+                        processorAssignments[processorId].push_back(t.name);
+                        taskCount[processorId]++;
+                        execTime[processorId] += duration;
 
-                    // Run for the time quantum or remaining time, whichever is smaller
-                    int timeToRun = std::min(timeQuantum, t.remainingBurstTime);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(timeToRun));
-                    t.remainingBurstTime -= timeToRun;
-
-                    // If there is remaining burst time, push it back into the queue
-                    if (t.remainingBurstTime > 0) {
-                        {
-                            std::lock_guard<std::mutex> lock(queueMutex);
-                            taskQueue.push(t);
-                        }
-                        {
-                            std::lock_guard<std::mutex> lock(printMutex);
-                            std::cout << "[" << currentTime() << "] [P" << i << "] Preempted: " << t.name
-                                      << " (remaining burst: " << t.remainingBurstTime << "ms)\n";
-                        }
-                    } else {
-                        {
-                            std::lock_guard<std::mutex> lock(printMutex);
-                            std::cout << "[" << currentTime() << "] [P" << i << "] Completed: " << t.name << "\n";
-                        }
+                        std::ostringstream log;
+                        log << "[" << currentTime() << "] Processor " << processorId
+                            << " executed " << t.name << " for " << exec << "ms, Remaining: " << t.remainingBurstTime << "ms";
+                        executionLog.push_back(log.str());
+                        std::cout << log.str() << "\n";
                     }
                 }
-            });
-        }
 
-        for (auto& p : processors)
-            p.join();
-
-        printAssignmentSummary(numProcessors);
-    }
-
-    void printAssignmentSummary(int numProcessors) {
-        std::cout << "\n=== Processor Assignment Summary ===\n";
-        for (int i = 0; i < numProcessors; ++i) {
-            std::cout << "Processor P" << i << " handled: ";
-            if (processorAssignments[i].empty()) {
-                std::cout << "None";
-            } else {
-                for (const auto& tName : processorAssignments[i]) {
-                    std::cout << tName << " ";
+                auto endThread = std::chrono::high_resolution_clock::now();
+                int turnaround = std::chrono::duration_cast<std::chrono::milliseconds>(endThread - startTime).count();
+                {
+                    std::lock_guard<std::mutex> lock(queueMutex);
+                    turnaroundTimes.push_back(turnaround);
+                    activeTasks--;
+                    if (activeTasks == 0) done = true;
+                    cv.notify_all();
                 }
             }
-            std::cout << "\n";
-        }
-    }
+        };
 
-    void markDone() {
-        std::lock_guard<std::mutex> lock(queueMutex);
-        done = true;
-        cv.notify_all();
+        std::vector<std::thread> processors;
+        for (int i = 0; i < numProcessors; ++i) {
+            processors.emplace_back(worker, i);
+        }
+        for (auto& p : processors) {
+            p.join();
+        }
+
+        auto endTime = std::chrono::high_resolution_clock::now();
+        double totalExecutionTime = std::chrono::duration<double>(endTime - startTime).count();
+
+        double avgTAT = 0.0;
+        for (int t : turnaroundTimes) avgTAT += t;
+        avgTAT /= turnaroundTimes.size();
+
+        double throughput = static_cast<double>(turnaroundTimes.size()) / totalExecutionTime;
+
+        double totalBusyTime = 0;
+        for (const auto& [_, t] : execTime) totalBusyTime += t / 1000.0;
+        double cpuUtilization = (totalBusyTime / (numProcessors * totalExecutionTime)) * 100.0;
+
+        // Write metrics in tabular CSV format
+        std::ofstream out("metrics.csv", std::ios::app);
+        static bool headerWritten = false;
+        if (!headerWritten) {
+            out << "Run Type,Execution Time (s),Average Turnaround Time (ms),Throughput (tasks/sec),CPU Utilization (%)\n";
+            headerWritten = true;
+        }
+        out << (numProcessors == 1 ? "Single Processor" : "Multiprocessor") << ","
+            << totalExecutionTime << ","
+            << avgTAT << ","
+            << throughput << ","
+            << cpuUtilization << "\n";
+        out.close();
+
+        // Write execution log in tabular CSV format
+        std::ofstream logFile("execution_log.csv", std::ios::app);
+        static bool logHeaderWritten = false;
+        if (!logHeaderWritten) {
+            logFile << "Timestamp,Processor ID,Thread Name,Execution Time (ms),Remaining Time (ms)\n";
+            logHeaderWritten = true;
+        }
+        for (const auto& logEntry : executionLog) {
+            logFile << logEntry << "\n";
+        }
+        logFile.close();
+
+        std::cout << "\n==== Simulation Metrics ====" << (numProcessors == 1 ? " (Single Processor)" : " (Multiprocessor)") << " ====\n";
+        std::cout << "Total Execution Time: " << totalExecutionTime << " seconds\n";
+        std::cout << "Average Turnaround Time: " << avgTAT << " ms\n";
+        std::cout << "Throughput: " << throughput << " tasks/sec\n";
+        std::cout << "CPU Utilization: " << cpuUtilization << "%\n";
     }
 };
 
 int main() {
-    ThreadScheduler scheduler(500);  // 500ms time quantum for Round Robin
+    ThreadScheduler scheduler(100);  // time quantum = 100ms
+    scheduler.addThread(SimThread(1, "T1", 300));
+    scheduler.addThread(SimThread(2, "T2", 200));
+    scheduler.addThread(SimThread(3, "T3", 150));
+    scheduler.addThread(SimThread(4, "T4", 450));
+    scheduler.addThread(SimThread(5, "T5", 250));
+    scheduler.addThread(SimThread(6, "T6", 100));
+    scheduler.addThread(SimThread(7, "T7", 350));
+    scheduler.addThread(SimThread(8, "T8", 200));
+    scheduler.addThread(SimThread(9, "T9", 400));
+    scheduler.addThread(SimThread(10, "T10", 150));
 
-    const int numThreads = 10;
-    const int numProcessors = 4;
+    std::cout << "\n===== MULTIPROCESSOR RUN (3 processors) =====\n";
+    scheduler.runWithProcessors(3);
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dist(500, 2500); // burst times between 500–2500 ms
-
-    for (int i = 1; i <= numThreads; ++i) {
-        int burst = dist(gen);
-        scheduler.addThread(SimThread(i, "T" + std::to_string(i), burst));
-    }
-
-    std::thread schedulerThread([&scheduler, numProcessors]() {
-        scheduler.runWithProcessors(numProcessors);
-    });
-
-    scheduler.markDone();
-    schedulerThread.join();
+    std::cout << "\n===== SINGLE PROCESSOR RUN (1 processor) =====\n";
+    ThreadScheduler scheduler2(100);
+    scheduler2.addThread(SimThread(1, "T1", 300));
+    scheduler2.addThread(SimThread(2, "T2", 200));
+    scheduler2.addThread(SimThread(3, "T3", 150));
+    scheduler2.addThread(SimThread(4, "T4", 450));
+    scheduler2.addThread(SimThread(5, "T5", 250));
+    scheduler2.addThread(SimThread(6, "T6", 100));
+    scheduler2.addThread(SimThread(7, "T7", 350));
+    scheduler2.addThread(SimThread(8, "T8", 200));
+    scheduler2.addThread(SimThread(9, "T9", 400));
+    scheduler2.addThread(SimThread(10, "T10", 150));
+    scheduler2.runWithProcessors(1);
 
     return 0;
 }
