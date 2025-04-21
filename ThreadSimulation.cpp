@@ -10,7 +10,6 @@
 #include <iomanip>
 #include <ctime>
 #include <fstream>
-#include <filesystem>
 #include <sstream>
 
 struct SimThread {
@@ -75,7 +74,10 @@ public:
                 {
                     std::unique_lock<std::mutex> lock(queueMutex);
                     cv.wait(lock, [&]() { return !taskQueue.empty() || done; });
-                    if (taskQueue.empty() && done) break;
+
+                    if (taskQueue.empty() && done)
+                        break;
+
                     if (!taskQueue.empty()) {
                         t = taskQueue.front();
                         taskQueue.pop();
@@ -115,8 +117,10 @@ public:
                     std::lock_guard<std::mutex> lock(queueMutex);
                     turnaroundTimes.push_back(turnaround);
                     activeTasks--;
-                    if (activeTasks == 0) done = true;
-                    cv.notify_all();
+                    if (activeTasks == 0) {
+                        done = true;
+                        cv.notify_all(); // Important: wake up all threads to exit
+                    }
                 }
             }
         };
@@ -142,7 +146,6 @@ public:
         for (const auto& [_, t] : execTime) totalBusyTime += t / 1000.0;
         double cpuUtilization = (totalBusyTime / (numProcessors * totalExecutionTime)) * 100.0;
 
-        // Write metrics in tabular CSV format
         std::ofstream out("metrics.csv", std::ios::app);
         static bool headerWritten = false;
         if (!headerWritten) {
@@ -156,7 +159,6 @@ public:
             << cpuUtilization << "\n";
         out.close();
 
-        // Write execution log in tabular CSV format
         std::ofstream logFile("execution_log.csv", std::ios::app);
         static bool logHeaderWritten = false;
         if (!logHeaderWritten) {
@@ -176,35 +178,58 @@ public:
     }
 };
 
+std::vector<SimThread> readThreadsFromFile(const std::string& filename) {
+    std::vector<SimThread> threads;
+    std::ifstream infile(filename);
+    if (!infile.is_open()) {
+        std::cerr << "Error: Could not open " << filename << "\n";
+        return threads;
+    }
+
+    int id, bt;
+    std::string name;
+    while (infile >> id >> name >> bt) {
+        threads.emplace_back(id, name, bt);
+    }
+    infile.close();
+    return threads;
+}
+
 int main() {
-    ThreadScheduler scheduler(100);  // time quantum = 100ms
-    scheduler.addThread(SimThread(1, "T1", 300));
-    scheduler.addThread(SimThread(2, "T2", 200));
-    scheduler.addThread(SimThread(3, "T3", 150));
-    scheduler.addThread(SimThread(4, "T4", 450));
-    scheduler.addThread(SimThread(5, "T5", 250));
-    scheduler.addThread(SimThread(6, "T6", 100));
-    scheduler.addThread(SimThread(7, "T7", 350));
-    scheduler.addThread(SimThread(8, "T8", 200));
-    scheduler.addThread(SimThread(9, "T9", 400));
-    scheduler.addThread(SimThread(10, "T10", 150));
+    std::ifstream infile("thread_grouped.txt");
+    if (!infile.is_open()) {
+        std::cerr << "Failed to open threads.txt\n";
+        return 1;
+    }
+
+    std::vector<SimThread> threadList;
+    int id, burst;
+    std::string name;
+
+    while (infile >> id >> name >> burst) {
+        threadList.emplace_back(id, name, burst);
+    }
+    infile.close();
+
+    if (threadList.size() != 20) {
+        std::cerr << "Expected 20 threads, found " << threadList.size() << "\n";
+        return 1;
+    }
 
     std::cout << "\n===== MULTIPROCESSOR RUN (3 processors) =====\n";
+    ThreadScheduler scheduler(100);  // time quantum = 100ms
+    for (const auto& t : threadList) {
+        scheduler.addThread(t);
+    }
     scheduler.runWithProcessors(3);
 
     std::cout << "\n===== SINGLE PROCESSOR RUN (1 processor) =====\n";
     ThreadScheduler scheduler2(100);
-    scheduler2.addThread(SimThread(1, "T1", 300));
-    scheduler2.addThread(SimThread(2, "T2", 200));
-    scheduler2.addThread(SimThread(3, "T3", 150));
-    scheduler2.addThread(SimThread(4, "T4", 450));
-    scheduler2.addThread(SimThread(5, "T5", 250));
-    scheduler2.addThread(SimThread(6, "T6", 100));
-    scheduler2.addThread(SimThread(7, "T7", 350));
-    scheduler2.addThread(SimThread(8, "T8", 200));
-    scheduler2.addThread(SimThread(9, "T9", 400));
-    scheduler2.addThread(SimThread(10, "T10", 150));
+    for (const auto& t : threadList) {
+        scheduler2.addThread(t);
+    }
     scheduler2.runWithProcessors(1);
 
     return 0;
 }
+

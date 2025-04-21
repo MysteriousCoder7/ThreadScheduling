@@ -1,9 +1,8 @@
-/home/saksham/IT371P/build/CMakeFiles/intrinsics_gen.dir
-/home/saksham/IT371P/build/CMakeFiles/omp_gen.dir
-/home/saksham/IT371P/build/CMakeFiles/acc_gen.dir
-/home/saksham/IT371P/build/CMakeFiles/RISCVTargetParserTableGen.dir
-/home/saksham/IT371P/build/CMakeFiles/clang-tablegen-targets.dir
-/home/saksham/IT371P/build/CMakeFiles/CallGraphExtractor.dir
-/home/saksham/IT371P/build/CMakeFiles/ThreadDetector.dir
-/home/saksham/IT371P/build/CMakeFiles/edit_cache.dir
-/home/saksham/IT371P/build/CMakeFiles/rebuild_cache.dir
+/home/aryan/Documents/ThreadScheduling/build/CMakeFiles/intrinsics_gen.dir
+/home/aryan/Documents/ThreadScheduling/build/CMakeFiles/omp_gen.dir
+/home/aryan/Documents/ThreadScheduling/build/CMakeFiles/acc_gen.dir
+/home/aryan/Documents/ThreadScheduling/build/CMakeFiles/clang-tablegen-targets.dir
+/home/aryan/Documents/ThreadScheduling/build/CMakeFiles/CallGraphExtractor.dir
+/home/aryan/Documents/ThreadScheduling/build/CMakeFiles/ThreadDetector.dir
+/home/aryan/Documents/ThreadScheduling/build/CMakeFiles/edit_cache.dir
+/home/aryan/Documents/ThreadScheduling/build/CMakeFiles/rebuild_cache.dir

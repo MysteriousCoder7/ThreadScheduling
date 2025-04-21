@@ -7,6 +7,7 @@
 #include "llvm/Support/CommandLine.h"
 #include <set>
 #include <map>
+#include <fstream>
 #include <iostream>
 
 using namespace clang;
@@ -48,11 +49,20 @@ public:
     void HandleTranslationUnit(ASTContext &Context) override {
         Visitor.TraverseDecl(Context.getTranslationUnitDecl());
 
+        std::ofstream outFile("callgraph.txt"); // Output file
+
+        if (!outFile.is_open()) {
+            std::cerr << "Error: could not open file for writing call graph.\n";
+            return;
+        }
+
         for (auto &[caller, callees] : callGraph) {
             for (const auto &callee : callees) {
-                std::cout << caller << " -> " << callee << std::endl;
+                outFile << caller << " -> " << callee << std::endl;
             }
         }
+
+        outFile.close();
     }
 
 private:

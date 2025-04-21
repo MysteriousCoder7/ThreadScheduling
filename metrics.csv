@@ -1,3 +1,3 @@
 Run Type,Execution Time (s),Average Turnaround Time (ms),Throughput (tasks/sec),CPU Utilization (%)
-Multiprocessor,1.00243,531,9.97577,84.794
-Single Processor,2.5549,1412,3.91405,99.8084
+Multiprocessor,6.41861,3432.4,3.11594,96.3448
+Single Processor,18.6147,9556.4,1.07442,99.6577

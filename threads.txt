@@ -1,4 +1,20 @@
-pthread_create found at 
-
-Total threads found: 1
-/usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/x86_64-linux-gnu/c++/13/bits/gthr-default.h:663:10 <Spelling=/usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/x86_64-linux-gnu/c++/13/bits/gthr-default.h:663:19>
+1 T1 ~thread joinable operator== 
+2 T2 ~_Hashtable<_Key, clear assign end size 
+3 T3 xsgetn min 
+4 T4 work operator<< end 
+5 T5 wmemchr 
+6 T6 wcsstr 
+7 T7 wcspbrk 
+8 T8 wcschr 
+9 T9 vector<_Tp, _S_check_init_len _S_max_size min 
+10 T10 to_string size 
+11 T11 swap operator= thread copy _M_copy_aligned size 
+12 T12 target target_type _M_access 
+13 T13 system_error operator+ 
+14 T14 swap 
+15 T15 substr size 
+16 T16 notify_all operator* shutdown operator size 
+17 T17 shuffle_order_engine<_RandomNumberEngine, _M_initialize size 
+18 T18 seed operator() operator<< 
+19 T19 back empty size 
+20 T20 generate size 
