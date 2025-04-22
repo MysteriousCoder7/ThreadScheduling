@@ -29,6 +29,8 @@ private:
     int maxThreads = 20;
     int currentThreadCount = 0;
 
+    std::unordered_map<std::string, std::unordered_set<std::string>> reducedGraph;
+
     bool detectCycle(const std::string& funcName, std::unordered_set<std::string>& cycle) {
         if (inStack.count(funcName)) {
             cycle.insert(funcName);
@@ -51,13 +53,68 @@ private:
     }
 
     void groupCycles() {
+        visited.clear();
+        inStack.clear();
         for (const auto& entry : functions) {
             const auto& funcName = entry.first;
-            std::unordered_set<std::string> cycle;
-            if (detectCycle(funcName, cycle)) {
-                threadGroups.push_back({cycle.begin(), cycle.end()});
+            if (!visited.count(funcName)) {
+                std::unordered_set<std::string> cycle;
+                if (detectCycle(funcName, cycle)) {
+                    threadGroups.push_back({cycle.begin(), cycle.end()});
+                }
             }
         }
+    }
+
+    void identifyMajorFunctions() {
+        for (auto& entry : functions) {
+            const auto& funcName = entry.first;
+            const auto& func = entry.second;
+
+            if (func.dependencies.size() > 2 || callCount[funcName] > 1) {
+                entry.second.isMajor = true;
+            }
+        }
+    }
+
+    void buildReducedGraph(const std::unordered_set<std::string>& grouped) {
+        for (const auto& [func, deps] : dependencyGraph) {
+            if (grouped.count(func)) continue;
+            for (const auto& dep : deps) {
+                if (!grouped.count(dep)) {
+                    reducedGraph[func].insert(dep);
+                }
+            }
+        }
+    }
+
+    std::vector<std::string> topoSort() {
+        std::unordered_map<std::string, int> inDegree;
+        for (const auto& [node, deps] : reducedGraph) {
+            if (!inDegree.count(node)) inDegree[node] = 0;
+            for (const auto& dep : deps) {
+                inDegree[dep]++;
+            }
+        }
+
+        std::queue<std::string> q;
+        for (const auto& [node, deg] : inDegree) {
+            if (deg == 0) q.push(node);
+        }
+
+        std::vector<std::string> result;
+        while (!q.empty()) {
+            std::string node = q.front(); q.pop();
+            result.push_back(node);
+
+            for (const auto& neighbor : reducedGraph[node]) {
+                if (--inDegree[neighbor] == 0) {
+                    q.push(neighbor);
+                }
+            }
+        }
+
+        return result;
     }
 
     void assignThreads() {
@@ -93,34 +150,26 @@ private:
             threadId++;
         }
 
-        // Handle remaining major functions
-        for (const auto& entry : functions) {
-            if (currentThreadCount >= maxThreads) break;
-            const auto& funcName = entry.first;
+        // Build reduced graph for topological sorting
+        buildReducedGraph(alreadyGrouped);
 
-            if (alreadyGrouped.count(funcName) == 0 && entry.second.isMajor) {
-                int bt = entry.second.burstTime;
-                std::string threadLabel = "T" + std::to_string(threadId);
-                detailed << threadId << " " << threadLabel << " " << funcName << "\n";
-                grouped << threadId << " " << threadLabel << " " << bt << "\n";
-                currentThreadCount++;
-                threadId++;
-            }
+        // Topo sort the DAG of remaining functions
+        std::vector<std::string> topoOrder = topoSort();
+
+        for (const auto& funcName : topoOrder) {
+            if (currentThreadCount >= maxThreads) break;
+            if (alreadyGrouped.count(funcName)) continue;
+
+            int bt = functions[funcName].burstTime;
+            std::string threadLabel = "T" + std::to_string(threadId);
+            detailed << threadId << " " << threadLabel << " " << funcName << "\n";
+            grouped << threadId << " " << threadLabel << " " << bt << "\n";
+            currentThreadCount++;
+            threadId++;
         }
 
         detailed.close();
         grouped.close();
-    }
-
-    void identifyMajorFunctions() {
-        for (auto& entry : functions) {
-            const auto& funcName = entry.first;
-            const auto& func = entry.second;
-
-            if (func.dependencies.size() > 2 || callCount[funcName] > 1) {
-                entry.second.isMajor = true;
-            }
-        }
     }
 
 public:
@@ -147,8 +196,8 @@ public:
                     callCount[depName]++;
                 }
 
-                // Assign random burst time between 5 and 50
-                func.burstTime = 300 + std::rand() % 101; // Range: 300 to 400
+                // Assign random burst time between 300 and 400
+                func.burstTime = 300 + std::rand() % 101;
 
                 functions[funcName] = func;
             }
@@ -167,6 +216,6 @@ int main() {
     CallGraphProcessor processor;
     processor.parseCallGraph("build/callgraph.txt");
     processor.process();
-    std::cout << "[✔] threads.txt and thread_grouped.txt generated with indices and burst times.\n";
+    std::cout << "[✔] threads.txt and thread_grouped.txt generated with indices and burst times (including topo sort).\n";
     return 0;
 }
